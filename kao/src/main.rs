@@ -1,3 +1,3 @@
 fn main() {
-    println!("CTC, Kao (Frontend) v0.1.0");
+    println!("ctc - Kao (Frontend) v{}", env!("CARGO_PKG_VERSION"));
 }

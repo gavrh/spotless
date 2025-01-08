@@ -1,3 +1,3 @@
 fn main() {
-    println!("CTC, Todokeru (CDN) v0.1.0");
+    println!("ctc - Todokeru (CDN) v{}", env!("CARGO_PKG_VERSION"));
 }
