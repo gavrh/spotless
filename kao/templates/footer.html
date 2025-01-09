@@ -1,0 +1,3 @@
+{% if footer.is_some() -%}
+    <p>{{ footer.as_ref().unwrap().time }}</p>
+{%- endif %}
