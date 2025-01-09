@@ -1,3 +1,31 @@
 {% if footer.is_some() -%}
-    <p>{{ footer.as_ref().unwrap().time }}</p>
+<div style="display: flex; flex: 1; justify-content: space-between; padding-top: 40px; padding-bottom: 40px; width: 100%; max-width: 1000px; height: 200px;">
+    <div style="max-width: 250px;">
+        <h1 style="color: lightgray;">CTC</h1>
+        <p style="color: darkgray;">Buy and sell cryptocurrency to and from each other.</p>
+        <p style="color: darkgray; font-size: 14px;">CTC is owned and operated by LoveByte Ltd located at Thermistokli Dervi, 48, 3rd Floor, Office 306, 1065, Nicosia, Cyprus</p>
+        <p style="color: darkgray; font-size: 14px;">© All rights reserved 2025</p>
+        <p>{{ footer.as_ref().unwrap().time }}</p>
+    </div>
+    <div style="display: flex; flex-direction: column;">
+        <a style="width: fit-conent; margin-bottom: 10px;" href="/whatever">What is CTC?</a>
+        <a style="width: fit-conent; margin-bottom: 10px;" href="/whatever">Updates</a>
+        <a style="width: fit-conent; margin-bottom: 10px;" href="/whatever">Advertise</a>
+        <a style="width: fit-conent; margin-bottom: 10px;" href="/whatever">Staff</a>
+        <a style="width: fit-conent;" href="/whatever">Contact us</a>
+    </div>
+    <div style="display: flex; flex-direction: column;">
+        <a style="width: fit-conent; margin-bottom: 10px;" href="/whatever">Site rules</a>
+        <a style="width: fit-conent; margin-bottom: 10px;" href="/whatever">Privacy</a>
+        <a style="width: fit-conent; margin-bottom: 10px;" href="/whatever">Legal Opinion</a>
+        <a style="width: fit-conent; margin-bottom: 10px;" href="/whatever">Etiquette</a>
+        <a style="width: fit-conent;" href="/whatever">Exchange Standards</a>
+    </div>
+    <div style="display: flex; flex-direction: column;">
+        <a style="width: fit-conent; margin-bottom: 10px;" href="/whatever">Premium</a>
+        <a style="width: fit-conent; margin-bottom: 10px;" href="/whatever">Day mode</a>
+        <a style="width: fit-conent; margin-bottom: 10px;" href="/whatever">Canary</a>
+        <a style="width: fit-conent;" href="https://github.com/gavrh/ctc" target="_blank">Open source</a>
+    </div>
+</div>
 {%- endif %}
