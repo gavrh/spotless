@@ -7,7 +7,7 @@ use chrono::{ DateTime, Local };
 #[derive(Template)]
 #[template(path = "index.html")]
 struct IndexTemplate {
-    footer: Option<FooterTemplate>
+    footer: FooterTemplate
 }
 
 struct FooterTemplate {
@@ -19,9 +19,9 @@ async fn root() -> impl IntoResponse {
         StatusCode::OK, 
         Html(
             IndexTemplate{
-                footer: Some(FooterTemplate {
+                footer: FooterTemplate {
                     time: format!("{}", Local::now().format("%b %d, %Y (%H:%M)"))
-                })
+                }
             }.to_string()
         )
     ).into_response()

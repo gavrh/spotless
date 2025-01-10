@@ -1,0 +1,21 @@
+.footer-container {
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    width: 100%;
+    max-width: 1000px;
+    height: 200px;
+}
+.footer-section {
+    display: flex;
+    flex-direction: column;
+}
+.footer-link {
+    width: fit-content;
+    margin-bottom: 10px;
+}
+.footer-link-last {
+    width: fit-content;
+}

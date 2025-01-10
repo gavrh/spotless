@@ -10,12 +10,12 @@
 
 ## Structure
 
-| Codebase             | Description  |
-| :------------------- | :----------- |
-| [kao](kao)           | Frontend     |
-| [joho](joho)         | API          |
-| [todokeru](todokeru) | CDN          |
-| [sukima](sukima)     | PSQL Schemas |
+| Codebase             | Description    |
+| :------------------- | :------------- |
+| [kao](kao)           | Frontend       |
+| [joho](joho)         | API            |
+| [waka](waka)         | Backend Worker |
+| [sukima](sukima)     | PSQL Schemas   |
 
 ## Branches
 
