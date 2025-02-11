@@ -14,7 +14,7 @@ FetchContent_Declare(ftxui
 FetchContent_MakeAvailable(ftxui)
 
 file(GLOB SOURCE_FILES src/*.cpp)
-file(GLOB HEADER_FILES src/*.h)
+file(GLOB HEADER_FILES src/*.hpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(${PROJECT_NAME}
