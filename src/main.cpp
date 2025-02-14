@@ -1,10 +1,16 @@
+#include <chrono>
 #include <ftxui/dom/elements.hpp>
+#include <ftxui/dom/node.hpp>
 #include <ftxui/screen/screen.hpp>
+#include <ftxui/component/screen_interactive.hpp>
+#include <ftxui/component/component.hpp>
 #include <iostream>
 #include <iomanip>
 #include <nlohmann/json.hpp>
 #include <curl/curl.h>
 #include <cstddef>
+#include <thread>
+#include <chrono>
 
 using json = nlohmann::json;
 
@@ -16,23 +22,10 @@ size_t write_callback(char *ptr, size_t size, size_t nmemb, std::string *data) {
 
 int main(void) {
 
+    // testing nlohmann_json
     std::cout << std::setw(4) << json::meta() << std::endl;
 
-
-    ftxui::Element document =
-        ftxui::hbox({
-            ftxui::text("left") | ftxui::border,
-            ftxui::text("middle") | ftxui::border | ftxui::flex,
-            ftxui::text("right") | ftxui::border,
-        });
-
-    auto screen = ftxui::Screen::Create(
-        ftxui::Dimension::Full(),
-        ftxui::Dimension::Fit(document)
-    );
-    ftxui::Render(screen, document);
-    screen.Print();
-
+    // testing libcurl
     CURL *curl;
     CURLcode res;
     std::string response_data;
@@ -54,6 +47,23 @@ int main(void) {
         curl_easy_cleanup(curl);
     }
     curl_global_cleanup();
+
+    // testing ftxui
+    int dots = 0;
+    auto renderer = ftxui::Renderer([&] {
+        return ftxui::text(std::string("Spotless") + std::string(dots, '.'));
+    });
+
+    auto screen = ftxui::ScreenInteractive::Fullscreen();
+    std::thread updater([&] {
+        while (true) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            dots = (dots + 1) % 4;
+            screen.PostEvent(ftxui::Event::Custom);
+        }
+    });
+
+    screen.Loop(renderer);
 
     return EXIT_SUCCESS;
 }
