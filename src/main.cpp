@@ -48,11 +48,12 @@ public:
     }
 
     // Renders the UI
-    Component RenderUI() {
-        return Renderer([this] {
+    Component RenderUI(Component comp) {
+        return Renderer([this, comp] {
             std::string mode_str = (mode == Normal) ? "Normal Mode" : "Command Mode: " + command;
 
             Elements content = {
+                comp->Render() | flex,
                 text("Command Line Emulator - Mode: " + mode_str),
                 separator(),
                 text("Press ':' to enter command mode, then type a command like 'quit' or 'help'."),
@@ -60,7 +61,7 @@ public:
 
             // Show the command input box only in Command Mode
             if (mode == Command) {
-                content.push_back(text("Command: " + command) | border);
+                content.push_back(text(":" + command));
             }
 
             return vbox(content);
@@ -168,7 +169,7 @@ int main(void) {
     auto screen = ScreenInteractive::Fullscreen();
     CommandLineEmulator cli;
 
-    auto ui = cli.RenderUI();
+    auto ui = cli.RenderUI(main_container);
     auto component = CatchEvent(ui, [&cli](Event event) {
         return cli.HandleInput(event);
     });
