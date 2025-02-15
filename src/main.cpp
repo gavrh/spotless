@@ -11,8 +11,10 @@
 #include <cstddef>
 #include <thread>
 #include <chrono>
+#include <CImg.h>
 
 using json = nlohmann::json;
+using namespace cimg_library;
 
 size_t write_callback(char *ptr, size_t size, size_t nmemb, std::string *data) {
     size_t total_size = size * nmemb;
@@ -48,6 +50,12 @@ int main(void) {
     }
     curl_global_cleanup();
 
+    // testing CImg
+    CImg<unsigned char> image(640, 480, 1, 3, 0);
+    unsigned char red[] = {255, 0, 0};
+    image.draw_text(100, 100, "Hello, USING CIMG HERE!", red);
+    image.display("TEST CIMG");
+
     // testing ftxui
     int dots = 0;
     auto renderer = ftxui::Renderer([&] {
@@ -63,7 +71,7 @@ int main(void) {
         }
     });
 
-    screen.Loop(renderer);
+    // screen.Loop(renderer);
 
     return EXIT_SUCCESS;
 }
