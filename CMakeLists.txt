@@ -34,16 +34,6 @@ FetchContent_Declare(curl
     URL https://curl.se/download/curl-8.12.0.tar.xz
 )
 FetchContent_MakeAvailable(curl)
-# cimg
-FetchContent_Declare(cimg
-    URL https://cimg.eu/files/CImg_3.5.2.zip
-)
-FetchContent_MakeAvailable(cimg)
-# X11
-FetchContent_Declare(X11
-    GIT_REPOSITORY https://gitlab.freedesktop.org/xorg/proto/xorgproto.git
-    GIT_TAG xorgproto-2024.1
-)
 
 file(GLOB SOURCE_FILES src/*.cpp)
 file(GLOB HEADER_FILES src/*.hpp)
@@ -55,5 +45,4 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE ftxui::component
     PRIVATE nlohmann_json::nlohmann_json
     PRIVATE CURL::libcurl
-    PRIVATE X11
 )

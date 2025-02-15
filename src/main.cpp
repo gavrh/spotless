@@ -1,4 +1,4 @@
-#include <chrono>
+#include <ftxui/component/event.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/dom/node.hpp>
 #include <ftxui/screen/screen.hpp>
@@ -9,12 +9,84 @@
 #include <nlohmann/json.hpp>
 #include <curl/curl.h>
 #include <cstddef>
-#include <thread>
-#include <chrono>
-#include <CImg.h>
+#include <string>
+#include <vector>
+
+using namespace ftxui;
+
+enum Mode { Normal, Command };
+
+class CommandLineEmulator {
+public:
+    CommandLineEmulator() : mode(Normal), command("") {}
+
+    // Handles input events
+    bool HandleInput(Event event) {
+        if (mode == Normal) {
+            if (event == Event::Character(':')) {
+                mode = Command;  // Switch to Command Mode
+                command.clear();
+                return true;
+            }
+        } else if (mode == Command) {
+            if (event == Event::Return) {
+                ProcessCommand();
+                mode = Normal;  // Return to Normal Mode after executing command
+                return true;
+            } else if (event == Event::Backspace) {
+                if (!command.empty()) command.pop_back();
+                return true;
+            } else if (event == Event::Escape) {
+                mode = Normal;
+                return true;
+            } else if (event.is_character()) {
+                command += event.character();
+                return true;
+            }
+        }
+        return false; // Event not handled
+    }
+
+    // Renders the UI
+    Component RenderUI() {
+        return Renderer([this] {
+            std::string mode_str = (mode == Normal) ? "Normal Mode" : "Command Mode: " + command;
+
+            Elements content = {
+                text("Command Line Emulator - Mode: " + mode_str),
+                separator(),
+                text("Press ':' to enter command mode, then type a command like 'quit' or 'help'."),
+            };
+
+            // Show the command input box only in Command Mode
+            if (mode == Command) {
+                content.push_back(text("Command: " + command) | border);
+            }
+
+            return vbox(content);
+        });
+    }
+
+private:
+    void ProcessCommand() {
+        if (command == "quit") {
+            std::cout << "Exiting program...\n";
+            std::exit(0);
+        } else if (command == "help") {
+            std::cout << "Available commands:\n";
+            std::cout << "  quit - Exit the program\n";
+            std::cout << "  help - Show this help text\n";
+        } else {
+            std::cout << "Unknown command: " << command << std::endl;
+        }
+    }
+
+    Mode mode;
+    std::string command;
+};
+
 
 using json = nlohmann::json;
-using namespace cimg_library;
 
 size_t write_callback(char *ptr, size_t size, size_t nmemb, std::string *data) {
     size_t total_size = size * nmemb;
@@ -50,28 +122,59 @@ int main(void) {
     }
     curl_global_cleanup();
 
-    // testing CImg
-    CImg<unsigned char> image(640, 480, 1, 3, 0);
-    unsigned char red[] = {255, 0, 0};
-    image.draw_text(100, 100, "Hello, USING CIMG HERE!", red);
-    image.display("TEST CIMG");
-
     // testing ftxui
-    int dots = 0;
-    auto renderer = ftxui::Renderer([&] {
-        return ftxui::text(std::string("Spotless") + std::string(dots, '.'));
+    auto title = ftxui::Renderer([] {
+        return ftxui::hbox({
+            ftxui::text("spotless") | ftxui::color(ftxui::Color::MediumSpringGreen) | ftxui::bold,
+            ftxui::text(" - Logged in as ") | ftxui::color(ftxui::Color::White),
+            ftxui::text("@user") | ftxui::color(ftxui::Color::MediumSpringGreen) | ftxui::bold,
+        });
     });
 
-    auto screen = ftxui::ScreenInteractive::Fullscreen();
-    std::thread updater([&] {
-        while (true) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            dots = (dots + 1) % 4;
-            screen.PostEvent(ftxui::Event::Custom);
-        }
+    
+    std::vector<std::string> entries1 = {
+        "Playlists",
+        "Albums",
+    };
+    std::vector<std::string> entries2 = {
+        "Favorites",
+        "Other",
+    };
+    std::vector<std::string> entries3 = {
+        "Profile",
+        "Settings",
+    };
+    int selected2 = 0;
+    int selected3 = 0;
+    auto menu2 = ftxui::Menu(&entries2, &selected2);
+    auto menu3 = ftxui::Menu(&entries3, &selected3);
+    auto container1 = ftxui::Container::Vertical({
+        ftxui::Button("Playlists", [](){}),
+        ftxui::Button("Albums", [](){}),
+    });
+    auto container2 = ftxui::Container::Vertical({
+        menu2,
+    });
+    auto container3 = ftxui::Container::Vertical({
+        menu3,
     });
 
-    // screen.Loop(renderer);
+    auto main_container =  ftxui::Container::Horizontal({
+        container1 | ftxui::flex | ftxui::border,
+        container2 | ftxui::flex | ftxui::border,
+        container3| ftxui::flex | ftxui::border,
+    });
+
+    auto screen = ScreenInteractive::Fullscreen();
+    CommandLineEmulator cli;
+
+    auto ui = cli.RenderUI();
+    auto component = CatchEvent(ui, [&cli](Event event) {
+        return cli.HandleInput(event);
+    });
+
+    screen.Loop(component);  // Use a valid Component for event loop
+    return 0;
 
     return EXIT_SUCCESS;
 }
