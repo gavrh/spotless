@@ -13,80 +13,6 @@
 #include <vector>
 
 using namespace ftxui;
-
-enum Mode { Normal, Command };
-
-class CommandLineEmulator {
-public:
-    CommandLineEmulator() : mode(Normal), command("") {}
-
-    // Handles input events
-    bool HandleInput(Event event) {
-        if (mode == Normal) {
-            if (event == Event::Character(':')) {
-                mode = Command;  // Switch to Command Mode
-                command.clear();
-                return true;
-            }
-        } else if (mode == Command) {
-            if (event == Event::Return) {
-                ProcessCommand();
-                mode = Normal;  // Return to Normal Mode after executing command
-                return true;
-            } else if (event == Event::Backspace) {
-                if (!command.empty()) command.pop_back();
-                return true;
-            } else if (event == Event::Escape) {
-                mode = Normal;
-                return true;
-            } else if (event.is_character()) {
-                command += event.character();
-                return true;
-            }
-        }
-        return false; // Event not handled
-    }
-
-    // Renders the UI
-    Component RenderUI(Component comp) {
-        return Renderer([this, comp] {
-            std::string mode_str = (mode == Normal) ? "Normal Mode" : "Command Mode: " + command;
-
-            Elements content = {
-                comp->Render() | flex,
-                text("Command Line Emulator - Mode: " + mode_str),
-                separator(),
-                text("Press ':' to enter command mode, then type a command like 'quit' or 'help'."),
-            };
-
-            // Show the command input box only in Command Mode
-            if (mode == Command) {
-                content.push_back(text(":" + command));
-            }
-
-            return vbox(content);
-        });
-    }
-
-private:
-    void ProcessCommand() {
-        if (command == "quit") {
-            std::cout << "Exiting program...\n";
-            std::exit(0);
-        } else if (command == "help") {
-            std::cout << "Available commands:\n";
-            std::cout << "  quit - Exit the program\n";
-            std::cout << "  help - Show this help text\n";
-        } else {
-            std::cout << "Unknown command: " << command << std::endl;
-        }
-    }
-
-    Mode mode;
-    std::string command;
-};
-
-
 using json = nlohmann::json;
 
 size_t write_callback(char *ptr, size_t size, size_t nmemb, std::string *data) {
@@ -166,16 +92,46 @@ int main(void) {
         container3| ftxui::flex | ftxui::border,
     });
 
-    auto screen = ScreenInteractive::Fullscreen();
-    CommandLineEmulator cli;
+    int x = 10, y = 5;
+    int max_width = 0, max_height = 0;
 
-    auto ui = cli.RenderUI(main_container);
-    auto component = CatchEvent(ui, [&cli](Event event) {
-        return cli.HandleInput(event);
+   auto screen = ScreenInteractive::Fullscreen();
+
+    auto component = Renderer([&] {
+        // Get current terminal size
+        max_width = screen.dimx();
+        max_height = screen.dimy();
+
+        // Ensure "X" stays within bounds
+        x = std::clamp(x, 0, max_width - 2);
+        y = std::clamp(y, 0, max_height - 2);
+
+        // Create a dynamic grid based on terminal size
+        std::vector<Element> rows;
+        for (int row = 0; row < max_height - 1; row++) {
+            std::string line(max_width - 1, ' ');
+            if (row == y) line[x] = 'X';  // Place "X"
+            rows.push_back(text(line));
+        }
+
+        return vbox(rows) | border;
     });
 
-    screen.Loop(component);  // Use a valid Component for event loop
-    return 0;
+    // Catch events for movement and resizing
+    component = CatchEvent(component, [&](Event event) {
+        if (event == Event::Character('q')) {
+            screen.ExitLoopClosure()();
+            return true;
+        }
+        if (event == Event::ArrowLeft && x > 0) x--;
+        if (event == Event::ArrowRight && x < max_width - 2) x++;
+        if (event == Event::ArrowUp && y > 0) y--;
+        if (event == Event::ArrowDown && y < max_height - 2) y++;
+
+        return true;  // Event handled, force UI update
+    });
+
+    screen.Loop(component);
 
     return EXIT_SUCCESS;
 }
