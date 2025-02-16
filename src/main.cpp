@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
+#include <thread>
 
 using namespace ftxui;
 using json = nlohmann::json;
@@ -20,6 +21,12 @@ size_t write_callback(char *ptr, size_t size, size_t nmemb, std::string *data) {
     data->append(ptr, total_size);
     return total_size;
 }
+
+#if defined(_WIN32) || defined(_WIN64)
+    #define REDIRECT_CMD " > nul 2>&1"
+#else
+    #define REDIRECT_CMD " > /dev/null 2>&1 < /dev/null &"
+#endif
 
 int main(void) {
 
@@ -103,6 +110,10 @@ int main(void) {
     //component = CatchEvent(component, [&](Event event) {
     //    return true;
     //});
+
+
+    std::string librespot_cmd = "nohup librespot --backend pulseaudio --cache ~/.config/librespot_cache --name \"spotless\" --bitrate 320 --disable-discovery --autoplay on > /dev/null 2>&1 &";
+    system(librespot_cmd.c_str());
 
     screen.Loop(component);
 
