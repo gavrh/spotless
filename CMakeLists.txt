@@ -22,6 +22,9 @@ include(cmake/ftxui.cmake)
 include(cmake/nlohmann.cmake)
 include(cmake/curl.cmake)
 
+include (cmake/cargo.cmake)
+include (cmake/librespot.cmake)
+
 file(GLOB SOURCE_FILES src/*.cpp)
 file(GLOB HEADER_FILES src/*.hpp)
 
