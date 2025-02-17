@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include "librespot_wrapper.hpp"
 
 using namespace ftxui;
 using json = nlohmann::json;
@@ -115,7 +116,10 @@ int main(void) {
     std::string librespot_cmd = "nohup librespot --backend pulseaudio --cache ~/.config/librespot_cache --name \"spotless\" --bitrate 320 --disable-discovery --autoplay on > /dev/null 2>&1 &";
     system(librespot_cmd.c_str());
 
-    screen.Loop(component);
+    LibrespotWrapper spotify("../librespot_wrapper/target/release/liblibrespot_wrapper.so");
+    spotify.play_track("spotify:track:12345");
+
+    // screen.Loop(component);
 
     return EXIT_SUCCESS;
 }

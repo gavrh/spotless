@@ -25,10 +25,16 @@ include(cmake/curl.cmake)
 include (cmake/cargo.cmake)
 include (cmake/librespot.cmake)
 
+add_custom_target(librespot_rust ALL
+    COMMAND cargo build --release
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/librespot_wrapper
+)
+
 file(GLOB SOURCE_FILES src/*.cpp)
 file(GLOB HEADER_FILES src/*.hpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+add_dependencies(${PROJECT_NAME} librespot_rust)
 target_link_libraries(${PROJECT_NAME}
     PRIVATE ftxui::screen
     PRIVATE ftxui::dom
