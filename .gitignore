@@ -3,7 +3,10 @@ spotless
 # cmake / make
 CMakeFiles/
 CMakeCache.txt
+CPackConfig.cmake
+CPackSourceConfig.cmake
 cmake_install.cmake
+_deps/
 Makefile
 build/
 
