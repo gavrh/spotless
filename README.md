@@ -3,7 +3,7 @@ Lightweight Spotify client designed for the terminal. Perfect for developers and
 
 ## Installation
 
-### Linux
+### Linux / Mac
 ```bash
 git clone https://github.com/gavrh/spotless.git && cd spotless
 
@@ -11,9 +11,6 @@ mkdir build && cd build
 
 cmake .. && make
 ```
-
-### MacOS
-coming soon...
 
 ### Windows
 coming soon...
