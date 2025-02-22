@@ -13,7 +13,6 @@
 #include <vector>
 #include <thread>
 #include <librespot/playback/player.h>
-#include <librespot/playback/player_rust.h>
 
 using namespace ftxui;
 using json = nlohmann::json;
@@ -122,11 +121,6 @@ int main(void) {
     player_play(player);
     player_pause(player);
     // screen.Loop(component);
-
-    Player* player2 = player_new_rust();
-    std::cout << player_get_volume_rust(player2) << std::endl;
-    player_play_rust(player2);
-    player_pause_rust(player2);
 
     return EXIT_SUCCESS;
 }
