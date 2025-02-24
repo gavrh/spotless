@@ -13,6 +13,7 @@ if(POLICY CMP0076)
     cmake_policy(SET CMP0076 NEW)
     set(CMAKE_POLICY_DEFAULT_CMP0076 NEW)
 endif()
+message(STATUS "C++ compiler: ${CMAKE_CXX_COMPILER}")
 
 include(FetchContent)
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
@@ -23,8 +24,8 @@ include(cmake/ftxui.cmake)
 include(cmake/nlohmann.cmake)
 include(cmake/curl.cmake)
 
-file(GLOB SOURCE_FILES src/*.cpp)
-file(GLOB HEADER_FILES src/*.hpp)
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS src/*.cpp)
+file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS src/*.hpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(${PROJECT_NAME}

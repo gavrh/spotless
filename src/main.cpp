@@ -11,8 +11,6 @@
 #include <cstddef>
 #include <string>
 #include <vector>
-#include <thread>
-#include <librespot/playback/player.h>
 
 using namespace ftxui;
 using json = nlohmann::json;
@@ -112,15 +110,5 @@ int main(void) {
     //    return true;
     //});
 
-
-    std::string librespot_cmd = "nohup librespot --backend pulseaudio --cache ~/.config/librespot_cache --name \"spotless\" --bitrate 320 --disable-discovery --autoplay on > /dev/null 2>&1 &";
-    system(librespot_cmd.c_str());
-
-    Player* player = player_new();
-    std::cout << player_get_volume(player) << std::endl;
-    player_play(player);
-    player_pause(player);
-    // screen.Loop(component);
-
-    return EXIT_SUCCESS;
+    screen.Loop(component);
 }
