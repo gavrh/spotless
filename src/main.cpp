@@ -58,9 +58,7 @@ int main(void) {
     // testing ftxui
     auto title = ftxui::Renderer([] {
         return ftxui::hbox({
-            ftxui::text("spotless") | ftxui::color(ftxui::Color::MediumSpringGreen) | ftxui::bold,
-            ftxui::text(" - Logged in as ") | ftxui::color(ftxui::Color::White),
-            ftxui::text("@user") | ftxui::color(ftxui::Color::MediumSpringGreen) | ftxui::bold,
+            ftxui::text("spotless") | ftxui::color(ftxui::Color::MediumSpringGreen) | ftxui::bold
         });
     });
 
@@ -95,13 +93,13 @@ int main(void) {
     auto main_container =  ftxui::Container::Horizontal({
         container1 | ftxui::flex | ftxui::border,
         container2 | ftxui::flex | ftxui::border,
-        container3| ftxui::flex | ftxui::border,
+        container3 | ftxui::flex | ftxui::border,
     });
    auto screen = ScreenInteractive::Fullscreen();
 
     auto component = Renderer([title, main_container] {
         return vbox({
-            title->Render() | center,
+            title->Render(),
             main_container->Render() | flex,
         });
     });
