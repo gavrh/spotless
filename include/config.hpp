@@ -14,7 +14,7 @@ public:
     bool show_features = true;
 
     ConfigOptions() = default;
-    ConfigOptions(const toml::node_view<toml::node> &node);
+    ConfigOptions(toml::node_view<toml::node> node);
     ~ConfigOptions();
 
 };
@@ -26,7 +26,7 @@ public:
     uint32_t secondary =    0xffffff;
 
     ConfigTheme() = default;
-    ConfigTheme(const toml::node_view<toml::node> &node);
+    ConfigTheme(toml::node_view<toml::node> node);
     ~ConfigTheme();
 
 };

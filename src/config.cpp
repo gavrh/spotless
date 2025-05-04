@@ -7,13 +7,13 @@
 namespace spotless {
 namespace config {
 
-ConfigOptions::ConfigOptions(const toml::node_view<toml::node> &node) {
+ConfigOptions::ConfigOptions(toml::node_view<toml::node> node) {
     this->show_features = node["show_features"].value_or(this->show_features);
 }
 ConfigOptions::~ConfigOptions() {
 }
 
-ConfigTheme::ConfigTheme(const toml::node_view<toml::node> &node) {
+ConfigTheme::ConfigTheme(toml::node_view<toml::node> node) {
     this->main = node["main"].value_or(this->main);
     this->secondary = node["secondary"].value_or(this->secondary);
 }
@@ -59,11 +59,8 @@ void Config::Load() {
 
         toml::table config = toml::parse_file(this->path);
 
-        const toml::node_view<toml::node> &options = config["config"];
-        const toml::node_view<toml::node> &theme = config["theme"];
-
-        this->options = ConfigOptions(options);
-        this->theme = ConfigTheme(theme);
+        this->options = ConfigOptions(config["config"]);
+        this->theme = ConfigTheme(config["theme"]);
 
     } else {
 
