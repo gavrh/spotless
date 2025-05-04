@@ -8,11 +8,16 @@ without the need for a heavy app or GUI.
 
 ### Linux / Mac
 ```bash
+# clone repo
 git clone https://github.com/gavrh/spotless.git && cd spotless
 
+# build
 mkdir build && cd build
 
 cmake .. && make
+
+# link to bin directory
+sudo ln -sf "$(pwd)/spotless" /usr/local/bin/spotless
 ```
 
 ### Windows
