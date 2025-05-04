@@ -8,15 +8,12 @@
 namespace spotless {
 namespace config {
 
-// default config path
-constexpr const char* DEFAULT_PATH = "~/.config/spotless/config.toml";
-
 class ConfigOptions {
 
 public:
     bool show_features = true;
 
-    ConfigOptions();
+    ConfigOptions() = default;
     ConfigOptions(const toml::node_view<toml::node> &node);
     ~ConfigOptions();
 
@@ -28,7 +25,7 @@ public:
     uint32_t main =         0x000000;
     uint32_t secondary =    0xffffff;
 
-    ConfigTheme();
+    ConfigTheme() = default;
     ConfigTheme(const toml::node_view<toml::node> &node);
     ~ConfigTheme();
 
@@ -46,6 +43,14 @@ public:
     Config();
     Config(std::string path);
     ~Config();
+
+    // TEMP
+    void View();
+
+private:
+
+    std::string DefaultPath();
+    void Load();
 
 };
 
