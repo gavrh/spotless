@@ -22,3 +22,22 @@ sudo ln -sf "$(pwd)/spotless" /usr/local/bin/spotless
 
 ### Windows
 coming soon...
+
+## Configuring
+
+Starter config file with default configuration:
+```toml
+# ~/.config/spotless/config.toml
+
+[options]
+show_featured_artists = true
+
+[cache]
+login = true
+playback = true
+songs = false
+
+[theme]
+main = 0xffffff
+secondary = 0x000000
+```
