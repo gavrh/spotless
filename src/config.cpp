@@ -2,25 +2,29 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 
 namespace spotless {
 namespace config {
 
-ConfigOptions::ConfigOptions(toml::node_view<toml::node> node) {
-    this->cache_login = node["cache_login"].value_or(this->cache_login);
-    this->cache_songs = node["cache_songs"].value_or(this->cache_songs);
-    this->show_featured_artists = node["show_featured_artists"].value_or(this->show_featured_artists);
+ConfigOptions::ConfigOptions(toml::value &value) {
+    this->show_featured_artists = value.contains("show_featured_artists") ? value["show_featured_artists"].as_boolean() : this->show_featured_artists;
 }
-ConfigOptions::~ConfigOptions() {
-}
+ConfigOptions::~ConfigOptions() {}
 
-ConfigTheme::ConfigTheme(toml::node_view<toml::node> node) {
-    this->main = node["main"].value_or(this->main);
-    this->secondary = node["secondary"].value_or(this->secondary);
+ConfigCache::ConfigCache(toml::value &value) {
+    this->login = value.contains("login") ? value["login"].as_boolean() : this->login;
+    this->playback = value.contains("playback") ? value["playback"].as_boolean() : this->playback;
+    this->songs = value.contains("songs") ? value["songs"].as_boolean() : this->songs;
 }
-ConfigTheme::~ConfigTheme() {
+ConfigCache::~ConfigCache() {}
+
+ConfigTheme::ConfigTheme(toml::value &value) {
+    this->main = value.contains("main") ? value["main"].as_integer() : this->main;
+    this->secondary = value.contains("secondary") ? value["secondary"].as_integer() : this->secondary;
 }
+ConfigTheme::~ConfigTheme() {}
 
 Config::Config() {
 
@@ -36,16 +40,17 @@ Config::Config(std::string path) {
 
 }
 
-Config::~Config() {
-}
+Config::~Config() {}
 
 // TEMP
 void Config::View() {
-    std::cout << "Options"<< std::endl;
-    std::cout << "Cache login: " << this->options.cache_login << std::endl;
-    std::cout << "Cache songs: " << this->options.cache_songs << std::endl;
+    std::cout << "= Options ="<< std::endl;
     std::cout << "Show featured: " << this->options.show_featured_artists << std::endl;
-    std::cout << "Theme"<< std::endl;
+    std::cout << "= Cache ="<< std::endl;
+    std::cout << "Login: " << this->cache.login << std::endl;
+    std::cout << "Playback: " << this->cache.playback << std::endl;
+    std::cout << "Songs: " << this->cache.songs << std::endl;
+    std::cout << "= Theme ="<< std::endl;
     std::cout << "Main: " << this->theme.main << std::endl;
     std::cout << "Secondary: " << this->theme.secondary << std::endl;
 }
@@ -61,9 +66,10 @@ void Config::Load() {
 
     if (std::filesystem::exists(this->path)) {
 
-        toml::table config = toml::parse_file(this->path);
+        toml::value config = toml::parse(this->path);
 
-        this->options = ConfigOptions(config["config"]);
+        this->options = ConfigOptions(config["options"]);
+        this->cache = ConfigCache(config["cache"]);
         this->theme = ConfigTheme(config["theme"]);
 
     } else {

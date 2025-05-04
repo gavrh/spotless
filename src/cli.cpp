@@ -1,3 +1,4 @@
+#include <cache.hpp>
 #include <cli.hpp>
 #include <config.hpp>
 #include <iostream>
@@ -9,9 +10,11 @@ namespace cli {
 void handle(int argc, char** argv) {
     std::cout << argc << std::endl;
 
+    cache::Cache cache;
+
     config::Config config;
     config.View();
-    
+
 }
 
 }

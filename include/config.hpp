@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <string>
-#include <toml++/toml.hpp>
+#include <toml.hpp>
 
 namespace spotless {
 namespace config {
@@ -11,13 +11,24 @@ namespace config {
 class ConfigOptions {
 
 public:
-    bool cache_login =              true;
-    bool cache_songs =              false;
     bool show_featured_artists =    true;
 
     ConfigOptions() = default;
-    ConfigOptions(toml::node_view<toml::node> node);
+    ConfigOptions(toml::value &value);
     ~ConfigOptions();
+
+};
+
+class ConfigCache {
+
+public:
+    bool login = true;
+    bool playback = true;
+    bool songs = false;
+
+    ConfigCache() = default;
+    ConfigCache(toml::value &value);
+    ~ConfigCache();
 
 };
 
@@ -28,7 +39,7 @@ public:
     uint32_t secondary =    0xffffff;
 
     ConfigTheme() = default;
-    ConfigTheme(toml::node_view<toml::node> node);
+    ConfigTheme(toml::value &value);
     ~ConfigTheme();
 
 };
@@ -38,6 +49,7 @@ class Config {
 private:
     std::string     path;
     ConfigOptions   options;
+    ConfigCache     cache;
     ConfigTheme     theme;
 
 public:

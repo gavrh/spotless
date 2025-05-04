@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <string>
-#include <toml++/toml.hpp>
+#include <toml.hpp>
 
 namespace spotless {
 namespace cache {
@@ -15,21 +15,21 @@ public:
     std::string refresh_token = "";
 
     UserCache() = default;
-    UserCache(toml::node_view<toml::node> node);
+    UserCache(toml::value &value);
     ~UserCache();
 
 };
 
 class PlaybackCache {
-    
+
 public:
     std::string spotify_id =    "";
     uint32_t    position_ms =   0;
+    uint32_t    volume =        50;
 
     PlaybackCache() = default;
-    PlaybackCache(toml::node_view<toml::node> node);
+    PlaybackCache(toml::value &value);
     ~PlaybackCache();
-
 };
 
 class Cache {
@@ -44,6 +44,16 @@ public:
 
     UserCache& GetUserCache();
     PlaybackCache& GetPlaybackCache();
+
+    void UpdateUserCache(
+        std::string access_token,
+        std::string refresh_token
+    );
+    void UpdatePlaybackCache(
+        std::string spotify_id,
+        uint32_t    position_ms,
+        uint32_t    volume
+    );
 
 private:
     std::string CachePath();
