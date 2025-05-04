@@ -10,5 +10,9 @@ void User::refresh_token() {
     return;
 }
 
+Spotify::Spotify() {}
+
+Spotify::~Spotify() {}
+
 }
 }

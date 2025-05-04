@@ -11,18 +11,17 @@ namespace ui {
 class App {
 
 private:
-    cache::Cache &cache;
-    config::Config &config;
-    spotify::Spotify &spotify;
+    cache::Cache        &cache;
+    config::Config      &config;
+    spotify::Spotify    &spotify;
     
 public:
     
     App(
-        cache::Cache &cache,
-        config::Config &config,
-        spotify::Spotify &spotify
+        cache::Cache        &cache,
+        config::Config      &config,
+        spotify::Spotify    &spotify
     );
-
     ~App();
 
 };

@@ -11,7 +11,9 @@ namespace config {
 class ConfigOptions {
 
 public:
-    bool show_features = true;
+    bool cache_login =              true;
+    bool cache_songs =              false;
+    bool show_featured_artists =    true;
 
     ConfigOptions() = default;
     ConfigOptions(toml::node_view<toml::node> node);
@@ -39,7 +41,6 @@ private:
     ConfigTheme     theme;
 
 public:
-
     Config();
     Config(std::string path);
     ~Config();
