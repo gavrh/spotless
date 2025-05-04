@@ -9,7 +9,3 @@ cmake_install.cmake
 _deps/
 Makefile
 build/
-
-# rust
-Cargo.lock
-target/
