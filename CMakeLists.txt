@@ -25,7 +25,7 @@ include(cmake/curl.cmake)
 include(cmake/ftxui.cmake)
 include(cmake/librespot.cmake)
 include(cmake/nlohmann.cmake)
-include(cmake/tomlplusplus.cmake)
+include(cmake/toml11.cmake)
 
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS src/*.cpp)
 file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS include/*.hpp)
@@ -40,5 +40,5 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE ftxui::component
     PRIVATE librespot
     PRIVATE nlohmann_json::nlohmann_json
-    PRIVATE tomlplusplus
+    PRIVATE toml11::toml11
 )
