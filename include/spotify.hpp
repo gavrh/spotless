@@ -12,6 +12,12 @@ public:
     void refresh_token();
 };
 
+class Spotify {
+    
+private:
+    User user;
+};
+
 }
 }
 

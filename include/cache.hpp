@@ -1,10 +1,22 @@
 #ifndef SPOTLESS_CACHE_HPP
 #define SPOTLESS_CACHE_HPP
 
+#include <string>
+
 namespace spotless {
+namespace cache {
 
-int sum(int x, int y);
+class Cache {
 
+private:
+
+    Cache();
+    Cache(std::string path);
+    ~Cache();
+
+};
+
+}
 }
 
 

@@ -1,6 +1,8 @@
 #include <cli.hpp>
 #include <iostream>
 
+#include <CLI/CLI.hpp>
+
 namespace spotless {
 namespace cli {
 
