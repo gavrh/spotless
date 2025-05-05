@@ -8,14 +8,14 @@ namespace spotless {
 namespace cache {
 
 UserCache::UserCache(toml::value &value) {
-    this->access_token = value.contains("access_token") ? value["access_token"].as_string() : this->access_token;
-    this->refresh_token = value.contains("refresh_token") ? value["refresh_token"].as_string() : this->refresh_token;
+    this->access_token = value.contains("access_token") ? std::string(value["access_token"].as_string()) : this->access_token;
+    this->refresh_token = value.contains("refresh_token") ? std::string(value["refresh_token"].as_string()) : this->refresh_token;
     this->expires_at = value.contains("expires_at") ? value["expires_at"].as_integer() : this->expires_at;
 }
 UserCache::~UserCache() {}
 
 PlaybackCache::PlaybackCache(toml::value &value) {
-    this->spotify_id = value.contains("spotify_id") ? value["spotify_id"].as_string() : this->spotify_id;
+    this->spotify_id = value.contains("spotify_id") ? std::string(value["spotify_id"].as_string()) : this->spotify_id;
     this->position_ms = value.contains("position_ms") ? value["position_ms"].as_integer() : this->position_ms;
     this->volume = value.contains("volume") ? value["volume"].as_integer() : this->volume;
 }
