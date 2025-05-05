@@ -1,8 +1,9 @@
 #include <cache.hpp>
 #include <cli.hpp>
 #include <config.hpp>
-#include <iostream>
 #include <CLI/CLI.hpp>
+#include <iostream>
+#include <spotify.hpp>
 
 namespace spotless {
 namespace cli {
@@ -14,6 +15,10 @@ void handle(int argc, char** argv) {
 
     config::Config config;
     config.View();
+
+    spotify::Spotify spotify(cache);
+
+    while (true) {}
 
 }
 

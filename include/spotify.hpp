@@ -2,6 +2,7 @@
 #define SPOTLESS_SPOTIFY_HPP
 
 #include <cache.hpp>
+#include <cstdint>
 #include <librespot/playback.h>
 #include <queue>
 #include <string>
@@ -15,6 +16,7 @@ static constexpr const char* SPOTIFY_REDIRECT_URI = "http://127.0.0.1:8989/login
 
 enum SpotifyItemType {
     TRACK,
+    EPISODE
 };
 
 class SpotifyItem {
@@ -47,6 +49,7 @@ class User {
 public:
     std::string access_token;
     std::string refresh_token;
+    uint32_t    expires_at;
 
     User();
     ~User();

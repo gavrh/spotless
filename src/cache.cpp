@@ -10,14 +10,13 @@ namespace cache {
 UserCache::UserCache(toml::value &value) {
     this->access_token = value.contains("access_token") ? value["access_token"].as_string() : this->access_token;
     this->refresh_token = value.contains("refresh_token") ? value["refresh_token"].as_string() : this->refresh_token;
+    this->expires_at = value.contains("expires_at") ? value["expires_at"].as_integer() : this->expires_at;
 }
 UserCache::~UserCache() {}
 
 PlaybackCache::PlaybackCache(toml::value &value) {
     this->spotify_id = value.contains("spotify_id") ? value["spotify_id"].as_string() : this->spotify_id;
-
     this->position_ms = value.contains("position_ms") ? value["position_ms"].as_integer() : this->position_ms;
-    
     this->volume = value.contains("volume") ? value["volume"].as_integer() : this->volume;
 }
 PlaybackCache::~PlaybackCache() {}
@@ -47,6 +46,7 @@ Cache::Cache() {
 
             cache["user"]["access_token"] = this->user.access_token;
             cache["user"]["refresh_token"] = this->user.refresh_token;
+            cache["user"]["expires_at"] = this->user.expires_at;
 
             cache["playback"]["spotify_id"] = this->playback.spotify_id;
             cache["playback"]["position_ms"] = this->playback.position_ms;
@@ -73,11 +73,13 @@ PlaybackCache& Cache::GetPlaybackCache() {
 
 void Cache::UpdateUserCache(
     std::string access_token,
-    std::string refresh_token
+    std::string refresh_token,
+    uint32_t    expires_at
 ) {
 
     this->user.access_token = access_token;
     this->user.refresh_token = refresh_token;
+    this->user.expires_at = expires_at;
 
     std::string path = this->CachePath();
 
@@ -86,6 +88,7 @@ void Cache::UpdateUserCache(
         toml::value cache = toml::parse(path);
         cache["user"]["access_token"] = this->user.access_token;
         cache["user"]["refresh_token"] = this->user.refresh_token;
+        cache["user"]["expires_at"] = this->user.expires_at;
 
         std::ofstream cache_file(path);
         cache_file << std::setw(80) << cache;

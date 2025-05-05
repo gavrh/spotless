@@ -13,6 +13,7 @@ class UserCache {
 public:
     std::string access_token =  "";
     std::string refresh_token = "";
+    uint32_t expires_at =       0;
 
     UserCache() = default;
     UserCache(toml::value &value);
@@ -47,7 +48,8 @@ public:
 
     void UpdateUserCache(
         std::string access_token,
-        std::string refresh_token
+        std::string refresh_token,
+        uint32_t    expires_at
     );
     void UpdatePlaybackCache(
         std::string spotify_id,
