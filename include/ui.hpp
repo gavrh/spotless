@@ -9,6 +9,14 @@
 
 namespace ui {
 
+class CommandLine {
+
+};
+
+class PlaylistView {
+
+};
+
 class App {
 
 private:
