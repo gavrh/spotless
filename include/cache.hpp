@@ -5,7 +5,6 @@
 #include <string>
 #include <toml.hpp>
 
-namespace spotless {
 namespace cache {
 
 class UserCache {
@@ -63,7 +62,5 @@ private:
 };
 
 }
-}
-
 
 #endif // SPOTLESS_CACHE_HPP

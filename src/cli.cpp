@@ -5,7 +5,6 @@
 #include <iostream>
 #include <spotify.hpp>
 
-namespace spotless {
 namespace cli {
 
 void handle(int argc, char** argv) {
@@ -16,11 +15,10 @@ void handle(int argc, char** argv) {
     config::Config config;
     config.View();
 
-    spotify::Spotify spotify(cache);
+    spotify::Spotify spotify(cache, config);
 
     while (true) {}
 
 }
 
-}
 }

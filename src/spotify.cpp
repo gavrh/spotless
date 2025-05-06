@@ -1,7 +1,6 @@
 #include <librespot/oauth.h>
 #include <spotify.hpp>
 
-namespace spotless {
 namespace spotify {
 
 SpotifyItem::SpotifyItem() {}
@@ -13,7 +12,7 @@ Context::~Context() {}
 User::User() {}
 User::~User() {}
 
-Spotify::Spotify(cache::Cache &cache) {
+Spotify::Spotify(cache::Cache &cache, config::Config &config) {
 
     cache::UserCache user_cache = cache.GetUserCache();
 
@@ -28,11 +27,13 @@ Spotify::Spotify(cache::Cache &cache) {
         this->user.refresh_token = std::string(oauth_refresh_token(auth));
         this->user.expires_at = oauth_expires_at(auth);
 
-        cache.UpdateUserCache(
-            this->user.access_token,
-            this->user.refresh_token,
-            this->user.expires_at
-        );
+        if (config.cache.login) {
+            cache.UpdateUserCache(
+                this->user.access_token,
+                this->user.refresh_token,
+                this->user.expires_at
+            );
+        }
 
     } else {
         this->user.access_token = user_cache.access_token;
@@ -74,5 +75,4 @@ void Spotify::Load(
     player_load(this->player, spotify_uri.c_str(), start_playing, position_ms);
 }
 
-}
 }

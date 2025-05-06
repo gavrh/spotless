@@ -5,7 +5,6 @@
 #include <string>
 #include <toml.hpp>
 
-namespace spotless {
 namespace config {
 
 class ConfigOptions {
@@ -46,13 +45,12 @@ public:
 
 class Config {
 
-private:
+public:
     std::string     path;
     ConfigOptions   options;
     ConfigCache     cache;
     ConfigTheme     theme;
 
-public:
     Config();
     Config(std::string path);
     ~Config();
@@ -63,11 +61,11 @@ public:
 private:
 
     std::string DefaultPath();
+    void CreateDefault();
     void Load();
 
 };
 
-}
 }
 
 #endif // SPOTLESS_CONFIG_HPP

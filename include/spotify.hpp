@@ -2,13 +2,13 @@
 #define SPOTLESS_SPOTIFY_HPP
 
 #include <cache.hpp>
+#include <config.hpp>
 #include <cstdint>
 #include <librespot/playback.h>
 #include <queue>
 #include <string>
 #include <vector>
 
-namespace spotless {
 namespace spotify {
 
 static constexpr const char* SPOTIFY_CLIENT_ID = "65b708073fc0480ea92a077233ca87bd";
@@ -67,7 +67,7 @@ private:
     Mixer*          mixer;
 
 public:
-    Spotify(cache::Cache &cache);
+    Spotify(cache::Cache &cache, config::Config &config);
     ~Spotify();
 
     void HandleEvent(PlayerEvent* player_event);
@@ -83,7 +83,6 @@ public:
 
 };
 
-}
 }
 
 #endif // SPOTLESS_SPOTIFY_HPP

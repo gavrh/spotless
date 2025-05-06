@@ -1,6 +1,5 @@
 #include <ui.hpp>
 
-namespace spotless {
 namespace ui {
 
 App::App(
@@ -11,5 +10,4 @@ App::App(
 
 App::~App() {}
 
-}
 }

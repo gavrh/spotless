@@ -4,7 +4,6 @@
 #include <fstream>
 #include <iostream>
 
-namespace spotless {
 namespace config {
 
 ConfigOptions::ConfigOptions(toml::value &value) {
@@ -85,6 +84,20 @@ void Config::Load() {
                 std::cerr << "Failed to create config file\n";
                 return;
             }
+
+            toml::value config;
+
+            config["theme"]["main"] = this->theme.main;
+            config["theme"]["secondary"] = this->theme.secondary;
+
+            config["cache"]["login"] = this->cache.login;
+            config["cache"]["playback"] = this->cache.playback;
+            config["cache"]["songs"] = this->cache.songs;
+
+            config["options"]["show_featured_artists"] = this->options.show_featured_artists;
+
+            config_file << std::setw(80) << config;
+            config_file.close();
         }
 
         this->Load();
@@ -92,5 +105,4 @@ void Config::Load() {
 
 }
 
-}
 }

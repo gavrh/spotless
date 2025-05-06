@@ -4,7 +4,6 @@
 #include <iomanip>
 #include <iostream>
 
-namespace spotless {
 namespace cache {
 
 UserCache::UserCache(toml::value &value) {
@@ -129,5 +128,4 @@ std::string Cache::CachePath() {
 
 }
 
-}
 }
