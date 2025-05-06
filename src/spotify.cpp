@@ -47,11 +47,6 @@ Spotify::Spotify(cache::Cache &cache, config::Config &config) {
 
     this->mixer = mixer_new(mixer_config_default(), "softvol");
     this->player = player_new(player_config_default(), session, this->mixer, "pulseaudio");
-
-    //mixer_set_volume(mixer, mixer_get_volume(this->mixer) * 0.75);
-
-    player_load(this->player, "spotify:track:0z7ngORCg8jSVKmyF0veGT", true, 0);
-
     this->player_channel = player_channel_get(this->player);
 
 }

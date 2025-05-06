@@ -73,7 +73,7 @@ PlaybackCache& Cache::GetPlaybackCache() {
 void Cache::UpdateUserCache(
     std::string access_token,
     std::string refresh_token,
-    uint32_t    expires_at
+    uint64_t    expires_at
 ) {
 
     this->user.access_token = access_token;

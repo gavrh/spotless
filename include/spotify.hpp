@@ -47,9 +47,10 @@ public:
 class User {
 
 public:
+    std::string display_name;
     std::string access_token;
     std::string refresh_token;
-    uint32_t    expires_at;
+    uint64_t    expires_at;
 
     User();
     ~User();
@@ -59,14 +60,13 @@ public:
 
 class Spotify {
 
-private:
+public:
     Context         context;
     User            user;
     Player*         player;
     PlayerChannel*  player_channel;
     Mixer*          mixer;
 
-public:
     Spotify(cache::Cache &cache, config::Config &config);
     ~Spotify();
 

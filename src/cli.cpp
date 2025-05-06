@@ -1,3 +1,4 @@
+#include "ui.hpp"
 #include <cache.hpp>
 #include <cli.hpp>
 #include <config.hpp>
@@ -11,13 +12,9 @@ void handle(int argc, char** argv) {
     std::cout << argc << std::endl;
 
     cache::Cache cache;
-
     config::Config config;
-    config.View();
-
     spotify::Spotify spotify(cache, config);
-
-    while (true) {}
+    ui::App(cache, config, spotify);
 
 }
 
