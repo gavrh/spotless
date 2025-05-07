@@ -1,9 +1,11 @@
 #ifndef SPOTLESS_SPOTIFY_HPP
 #define SPOTLESS_SPOTIFY_HPP
 
+#include "phone.hpp"
 #include <cache.hpp>
 #include <config.hpp>
 #include <cstdint>
+#include <curl/curl.h>
 #include <librespot/playback.h>
 #include <queue>
 #include <string>
@@ -36,6 +38,7 @@ class Context {
 
 public:
     SpotifyItem             current;
+    bool                    is_playing;
     uint32_t                position_ms;
     std::queue<SpotifyItem> queue;
 
@@ -53,6 +56,7 @@ public:
     uint64_t    expires_at;
 
     User();
+    User(std::string display_name, cache::UserCache &user_cache);
     ~User();
 
 
@@ -66,6 +70,7 @@ public:
     Player*         player;
     PlayerChannel*  player_channel;
     Mixer*          mixer;
+    phone::Phone    phone;
 
     Spotify(cache::Cache &cache, config::Config &config);
     ~Spotify();
@@ -80,6 +85,12 @@ public:
         uint32_t    position_ms
     );
     uint32_t PositionMs();
+
+    void RefreshToken();
+    void UpdateToken(std::string access_token);
+
+private:
+    void AuthUser(cache::Cache &cache, config::Config &config);
 
 };
 
