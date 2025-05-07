@@ -23,7 +23,7 @@ sudo ln -sf "$(pwd)/spotless" /usr/local/bin/spotless
 ### Windows
 coming soon...
 
-## Configuring
+## Configuring (not fully implemented)
 
 Starter config file with default configuration:
 ```toml
