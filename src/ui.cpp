@@ -1,4 +1,5 @@
 #include <ftxui/component/component.hpp>
+#include <iostream>
 #include <thread>
 #include <chrono>
 #include <atomic>
@@ -38,7 +39,7 @@ App::App(
             bool selected = (int)i == selected_horizontal;
             items.push_back(
                 center(text(horizontal_entries[i])) |
-                (selected ? bgcolor(Color::Blue) | color(Color::White) : nothing) |
+                (selected ? bgcolor(Color::Green) | color(Color::White) : nothing) |
                 flex
             );
         }
@@ -62,7 +63,7 @@ App::App(
             bool selected = (int)i == selected_vertical;
             items.push_back(
                 text(vertical_entries[i]) |
-                (selected ? bgcolor(Color::Green) | color(Color::Black) : nothing)
+                (selected ? bgcolor(Color::Green) | color(Color::White) : nothing)
             );
         }
         return vbox(std::move(items)) | yflex | xflex;
@@ -85,31 +86,31 @@ App::App(
     });
 
     auto screen = ScreenInteractive::TerminalOutput().Fullscreen();
-    std::string top_text = "Library of gav";
+    std::string top_text = "Library of " + this->spotify.user.display_name;
     std::string time_elapsed = "0:00";
 
+    std::atomic<bool> running = true;
     Component renderer = CatchEvent(
         Renderer(
             main,
             [&] {
                 main->TakeFocus();
                 return vbox({
-                    text(top_text) | center | size(HEIGHT, EQUAL, 1) | xflex,
+                    text(top_text) | center | color(Color::Green) | size(HEIGHT, EQUAL, 1) | xflex,
                     horizontal_menu->Render() | size(HEIGHT, EQUAL, 1) | xflex,
                     vertical_menu->Render() | flex,
                     text(time_elapsed)| size(HEIGHT, EQUAL, 1) | xflex,
                 }) | flex;
             }), [&](Event event) {
-            if (event == Event::Special("poll")) {
+            if (event == Event::Special("tick")) {
                 PlayerEvent* player_event;
                 if (player_channel_poll(this->spotify.player_channel, player_event)) {
                     if (player_event->event == PLAYER_EVENT_TIME_TO_PRELOAD_NEXT_TRACK) {
-                        top_text = "hello";
                         this->spotify.Preload("spotify:track:6hxowqRsDm1fsm00y2eHJP");
                     } else if (player_event->event == PLAYER_EVENT_END_OF_TRACK) {
                         this->spotify.Load("spotify:track:6hxowqRsDm1fsm00y2eHJP", true, 0);
                     } else if (player_event->event == PLAYER_EVENT_POSITION_CHANGED) {
-
+                        time_elapsed = "▶️ ⏸️ " +std::to_string(player_event->data.position_changed.position_ms/1000);
                     }
                 }
                 return true;
@@ -139,23 +140,22 @@ App::App(
                 return true;
             }
             if (event == Event::Character('q')) {
+                running = false;
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
                 screen.Exit();
                 return true;
             }
             return false;
         });
 
-    std::atomic<bool> running = true;
-
     std::thread([&screen, &running]() {
         while (running) {
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            screen.PostEvent(Event::Special("poll"));
+            screen.PostEvent(Event::Special("tick"));
         }
     }).detach();
 
     screen.Loop(renderer);
-    running = false;
 
 }
 
