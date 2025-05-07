@@ -6,7 +6,6 @@
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/component/screen_interactive.hpp>
-#include <memory>
 #include <spotify.hpp>
 
 namespace ui {
@@ -36,8 +35,20 @@ public:
     ~App();
 
 private:
+    void UpdateUserCache();
+    void UpdatePlaybackCache();
+
+    ftxui::Component List(
+        ftxui::ScreenInteractive &screen,
+        int &horizontal_selected,
+        int &tracks_selected,
+        int &playlists_selected,
+        bool &in_playlist,
+        int &in_playlist_selected
+    );
     ftxui::Component TimeBar(ftxui::ScreenInteractive &screen);
     ftxui::Component CurrentBar();
+    bool HandleEvent(ftxui::Event &event);
 
 };
 

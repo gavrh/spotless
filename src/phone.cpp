@@ -28,22 +28,19 @@ void Phone::Perform(std::string url, bool use_auth, std::initializer_list<std::a
 
     curl_easy_setopt(this->handler, CURLOPT_URL, url.c_str());
     curl_easy_setopt(this->handler, CURLOPT_HTTPHEADER, headers);
-    if (fields.size() != 0) curl_easy_setopt(this->handler, CURLOPT_POSTFIELDS, encoded.c_str());
+    // if (fields.size() != 0) curl_easy_setopt(this->handler, CURLOPT_POSTFIELDS, encoded.c_str());
     curl_easy_setopt(this->handler, CURLOPT_WRITEFUNCTION, this->WriteCallback);
     curl_easy_setopt(this->handler, CURLOPT_WRITEDATA, &buffer);
 
     CURLcode res = curl_easy_perform(this->handler);
-    if (res == CURLE_OK) {
-        try {
-            this->data = nlohmann::json::parse(buffer);
-            if (this->data.contains("error")) {
-                this->code = static_cast<ResponseCode>(this->data["error"]["status"].get<int>());
-            } else {
-                this->code = SUCCESS;
-            }
-        } catch (const std::exception &e) {
-            std::cerr << "failed to parse: " << e.what() << std::endl;
+    try {
+        this->data = nlohmann::json::parse(buffer);
+        if (this->data.contains("error")) {
+            this->code = static_cast<ResponseCode>(this->data["error"]["status"].get<int>());
+        } else {
+            this->code = SUCCESS;
         }
+    } catch (const std::exception &e) {
     }
 
     curl_slist_free_all(headers);

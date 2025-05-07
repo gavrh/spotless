@@ -1,3 +1,4 @@
+#include <exception>
 #include <iostream>
 #include <librespot/oauth.h>
 #include <spotify.hpp>
@@ -9,17 +10,20 @@ SpotifyItem::SpotifyItem(phone::Phone &phone, std::string id) {
 
     phone.Perform("https://api.spotify.com/v1/tracks/" + id, true, {});
     if (phone.code == phone::SUCCESS) {
-        std::cout << phone.data.dump(4) << std::endl;
 
         this->id = phone.data["id"].get<std::string>();
         this->uri = phone.data["uri"].get<std::string>();
         this->name = phone.data["name"].get<std::string>();
+        this->album_name = phone.data["album"]["name"].get<std::string>();
         this->artist = phone.data["artists"][0]["name"].get<std::string>();
         this->duration_ms = phone.data["duration_ms"].get<uint32_t>();
     }
 
 }
 SpotifyItem::~SpotifyItem() {}
+
+Playlist::Playlist() {}
+Playlist::~Playlist() {}
 
 Context::Context() {}
 Context::~Context() {}
@@ -32,6 +36,65 @@ User::User(std::string display_name, cache::UserCache &user_cache) {
     this->expires_at = user_cache.expires_at;
 }
 User::~User() {}
+
+void User::LikedTracks(phone::Phone &phone) {
+    phone.Perform("https://api.spotify.com/v1/me/tracks?limit=50", true, {});
+    const auto &items = phone.data["items"];
+    for (const auto &item : items) {
+        const auto &track = item["track"];
+        SpotifyItem new_item;
+
+        new_item.id = track["id"].get<std::string>();
+        new_item.uri = track["uri"].get<std::string>();
+        new_item.name = track["name"].get<std::string>();
+        new_item.album_name = track["album"]["name"].get<std::string>();
+        new_item.artist = track["artists"][0]["name"].get<std::string>();
+        new_item.duration_ms = track["duration_ms"].get<uint32_t>();
+
+        this->liked_tracks.push_back(new_item);
+    }
+}
+
+void User::GetPlaylists(phone::Phone &phone) {
+    phone.Perform("https://api.spotify.com/v1/me/playlists?limit=50", true, {});
+    const auto items = phone.data["items"];
+
+    for (const auto item : items) {
+        Playlist playlist;
+
+        std::string url = "https://api.spotify.com/v1/playlists/"
+         + item["id"].get<std::string>()
+         + "/tracks?limit=100";
+
+        playlist.name = item["name"].get<std::string>();
+        playlist.owner = item["owner"]["display_name"].get<std::string>();
+        playlist.track_count = item["tracks"]["total"].get<uint32_t>();
+        
+        while (!url.empty()) {
+            phone.Perform(url, true, {});
+            const auto &tracks = phone.data["items"];
+            for (const auto &i: tracks) {
+                const auto &track = i["track"];
+                SpotifyItem new_item;
+
+                try {
+                    new_item.id = track["id"].get<std::string>();
+                    new_item.uri = track["uri"].get<std::string>();
+                    new_item.name = track["name"].get<std::string>();
+                    new_item.album_name = track["album"]["name"].get<std::string>();
+                    new_item.artist = track["artists"][0]["name"].get<std::string>();
+                    new_item.duration_ms = track["duration_ms"].get<uint32_t>();
+                } catch (std::exception &e) {}
+
+                playlist.tracks.push_back(new_item);
+            }
+            
+            url = phone.data.contains("next") && !phone.data["next"].is_null() ? phone.data["next"].get<std::string>() : "";
+        }
+
+        this->playlists.push_back(playlist);
+    }
+}
 
 Spotify::Spotify(cache::Cache &cache, config::Config &config) {
 
@@ -54,9 +117,6 @@ Spotify::Spotify(cache::Cache &cache, config::Config &config) {
         }
     }
 
-    std::cout << this->phone.data.dump(4) << std::endl;
-
-
     this->user = User(this->phone.data["display_name"].get<std::string>(), user_cache);
     this->SetupContext(playback_cache);
 
@@ -67,9 +127,6 @@ Spotify::Spotify(cache::Cache &cache, config::Config &config) {
     this->mixer = mixer_new(mixer_config_default(), "softvol");
     this->player = player_new(player_config_default(), session, this->mixer, "pulseaudio");
     this->player_channel = player_channel_get(this->player);
-
-    this->phone.Perform("https://api.spotify.com/v1/me/tracks", true, {});
-    std::cout << this->phone.data.dump(4) << std::endl;
 
 }
 Spotify::~Spotify() {}

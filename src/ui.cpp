@@ -32,30 +32,19 @@ App::App(
     mixer_set_volume(this->spotify.mixer, UINT16_MAX * (0.01 * this->spotify.context.volume));
 
     auto screen = ScreenInteractive::TerminalOutput().Fullscreen();
+
+    // press delay
     auto last_press_time = std::chrono::steady_clock::now();
     const auto delay = std::chrono::milliseconds(250);
-    // Menu entries
+
+    // selections
     std::vector<std::string> horizontal_entries = {"Tracks", "Playlists", "Help"};
     int selected_horizontal = 0;
+    int tracks_selected = 0;
+    int playlists_selected = 0;
+    bool in_playlist = false;
+    int in_playlist_selected = 0;
 
-    std::vector<std::string> vertical_entries = {
-        "Item A", "Item B", "Item C", "Item D", "Item E", "Item F", "Item G"
-        ,"Item A", "Item B", "Item C", "Item D", "Item E", "Item F", "Item G"
-        ,"Item A", "Item B", "Item C", "Item D", "Item E", "Item F", "Item G"
-        ,"Item A", "Item B", "Item C", "Item D", "Item E", "Item F", "Item G"
-        ,"Item A", "Item B", "Item C", "Item D", "Item E", "Item F", "Item G"
-        //,"Item A", "Item B", "Item C", "Item D", "Item E", "Item F", "Item G"
-        //,"Item A", "Item B", "Item C", "Item D", "Item E", "Item F", "Item G"
-        //,"Item A", "Item B", "Item C", "Item D", "Item E", "Item F", "Item G"
-        //,"Item A", "Item B", "Item C", "Item D", "Item E", "Item F", "Item G"
-        //,"Item A", "Item B", "Item C", "Item D", "Item E", "Item F", "Item G"
-        //,"Item A", "Item B", "Item C", "Item D", "Item E", "Item F", "Item G"
-        //,"Item A", "Item B", "Item C", "Item D", "Item E", "Item F", "Item G"
-        //,"Item A", "Item B", "Item C", "Item D", "Item E", "Item F", "Item G"
-    };
-    int selected_vertical = 2;
-
-    // Custom horizontal menu
     Component horizontal_menu = Renderer([&] {
         Elements items;
         for (size_t i = 0; i < horizontal_entries.size(); ++i) {
@@ -69,46 +58,10 @@ App::App(
         return hbox(std::move(items)) | xflex;
     });
 
-    // Custom vertical menu
-    // Component vertical_menu = Renderer([&] {
-    //     Elements items;
-    //     for (size_t i = 0; i < vertical_entries.size(); ++i) {
-    //         bool selected = (int)i == selected_vertical;
-    //         items.push_back(
-    //             text(vertical_entries[i]) |
-    //             (selected ? bgcolor(Color::Green) | color(Color::White) : nothing)
-    //         );
-    //     }
-    //     return vbox(std::move(items)) | yflex | xflex;
-    // });
-
-    int scroll_offset = 0;
-
-    Component vertical_menu = Renderer([&]() {
-        // Get the available vertical space from the component
-        int visible_lines = screen.dimy()-4;
-
-        // Adjust scroll to keep selection in view
-        if (selected_vertical < scroll_offset)
-            scroll_offset = selected_vertical;
-        else if (selected_vertical >= scroll_offset + visible_lines)
-            scroll_offset = selected_vertical - visible_lines + 1;
-
-        Elements items;
-        for (int i = scroll_offset; i < scroll_offset + visible_lines && i < (int)vertical_entries.size(); ++i) {
-            bool is_selected = i == selected_vertical;
-            auto item = text(vertical_entries[i]) |
-                (is_selected ? bgcolor(Color::Green) | color(Color::White) : nothing);
-            items.push_back(item);
-        }
-
-        return vbox(std::move(items));
-    });
 
     // Combine all components
     Component main = Container::Vertical({
         horizontal_menu,
-        vertical_menu,
     });
 
     std::string top_text = "Library of " + this->spotify.user.display_name;
@@ -122,7 +75,14 @@ App::App(
                 return vbox({
                     text(top_text) | center | color(Color::Green) | size(HEIGHT, EQUAL, 1) | xflex,
                     horizontal_menu->Render() | size(HEIGHT, EQUAL, 1) | xflex,
-                    vertical_menu->Render() | flex,
+                    this->List(
+                        screen,
+                        selected_horizontal,
+                        tracks_selected,
+                        playlists_selected,
+                        in_playlist,
+                        in_playlist_selected
+                    )->Render() | yflex,
                     this->TimeBar(screen)->Render(),
                     this->CurrentBar()->Render(), 
                 }) | flex;
@@ -136,15 +96,18 @@ App::App(
                         this->spotify.Load("spotify:track:6hxowqRsDm1fsm00y2eHJP", true, 0);
                     } else if (player_event->event == PLAYER_EVENT_POSITION_CHANGED) {
                         spotify.context.position_ms = player_event->data.position_changed.position_ms;
+                        this->UpdatePlaybackCache();
                     }
                 }
                 return true;
             }
-            if (event == Event::Character('j')) {
-                selected_vertical = selected_vertical == vertical_entries.size()-1 ? selected_vertical : ++selected_vertical;
+            if (event == Event::Character('j') && selected_horizontal != 2) {
+                int &selected_vertical = selected_horizontal == 0 ? tracks_selected : playlists_selected;
+                selected_vertical = selected_vertical == (int)(selected_horizontal == 0 ? this->spotify.user.liked_tracks.size() : this->spotify.user.playlists.size())-1 ? selected_vertical : ++selected_vertical;
                 return true;
             }
-            if (event == Event::Character('k')) {
+            if (event == Event::Character('k') && selected_horizontal != 2) {
+                int &selected_vertical = selected_horizontal == 0 ? tracks_selected : playlists_selected;
                 selected_vertical = selected_vertical == 0 ? selected_vertical : --selected_vertical;
                 return true;
             }
@@ -171,6 +134,7 @@ App::App(
                     last_press_time = now;
                     player_seek(spotify.player, spotify.context.position_ms + 1000);
                 }
+                this->UpdatePlaybackCache();
                 return true;
             }
             if (event == Event::Character('b')) {
@@ -179,6 +143,7 @@ App::App(
                     last_press_time = now;
                     player_seek(spotify.player, spotify.context.position_ms < 1000 ? 0 : spotify.context.position_ms - 1000);
                 }
+                this->UpdatePlaybackCache();
                 return true;
             }
             if (event == Event::Character('F')) {
@@ -187,6 +152,7 @@ App::App(
                     last_press_time = now;
                     player_seek(spotify.player, spotify.context.position_ms + 5000);
                 }
+                this->UpdatePlaybackCache();
                 return true;
             }
             if (event == Event::Character('B')) {
@@ -195,12 +161,14 @@ App::App(
                     last_press_time = now;
                     player_seek(spotify.player, spotify.context.position_ms < 5000 ? 0 : spotify.context.position_ms - 5000);
                 }
+                this->UpdatePlaybackCache();
                 return true;
             }
             if (event == Event::Character('+')) {
                 spotify.context.volume++;
                 if (spotify.context.volume > 100) spotify.context.volume = 100;
                 mixer_set_volume(this->spotify.mixer, UINT16_MAX * (0.01 * this->spotify.context.volume));
+                this->UpdatePlaybackCache();
                 return true;
             }
             if (event == Event::Character('-')) {
@@ -211,12 +179,14 @@ App::App(
                 }
                 if (spotify.context.volume < 0) spotify.context.volume = 0;
                 mixer_set_volume(this->spotify.mixer, UINT16_MAX * (0.01 * this->spotify.context.volume));
+                this->UpdatePlaybackCache();
                 return true;
             }
             if (event == Event::Character(']')) {
                 spotify.context.volume+=5;
                 if (spotify.context.volume > 100) spotify.context.volume = 100;
                 mixer_set_volume(this->spotify.mixer, UINT16_MAX * (0.01 * this->spotify.context.volume));
+                this->UpdatePlaybackCache();
                 return true;
             }
             if (event == Event::Character('[')) {
@@ -226,12 +196,25 @@ App::App(
                     spotify.context.volume-=5;
                 }
                 mixer_set_volume(this->spotify.mixer, UINT16_MAX * (0.01 * this->spotify.context.volume));
+                this->UpdatePlaybackCache();
                 return true;
             }
             if (event == Event::Character('q')) {
                 running = false;
+                this->UpdatePlaybackCache();
                 screen.Exit();
                 return true;
+            }
+            if (event == Event::Return && selected_horizontal != 2) {
+                if (selected_horizontal == 0) {
+                    this->spotify.Load(this->spotify.user.liked_tracks[tracks_selected].uri, true, 0);
+                    this->spotify.context.current = this->spotify.user.liked_tracks[tracks_selected];
+                    this->spotify.context.is_playing = true;
+                } else {
+                    this->spotify.Load(this->spotify.user.playlists[playlists_selected].tracks[0].uri, true, 0);
+                    this->spotify.context.current = this->spotify.user.playlists[playlists_selected].tracks[0];
+                    this->spotify.context.is_playing = true;
+                }
             }
             return false;
         });
@@ -243,11 +226,111 @@ App::App(
         }
     }).detach();
 
+    spotify::User &user = this->spotify.user;
+    std::thread([&user]() {
+        phone::Phone phone;
+        phone.SetToken(user.access_token);
+        user.LikedTracks(phone);
+    }).detach();
+    std::thread([&user]() {
+        phone::Phone phone;
+        phone.SetToken(user.access_token);
+        user.GetPlaylists(phone);
+    }).detach();
+
     screen.Loop(renderer);
 
 }
 
 App::~App() {}
+
+void App::UpdateUserCache() {
+
+}
+
+void App::UpdatePlaybackCache() {
+    this->cache.UpdatePlaybackCache(
+        this->spotify.context.current.id,
+        this->spotify.context.position_ms,
+        this->spotify.context.volume
+    );
+}
+
+ftxui::Component App::List(
+    ftxui::ScreenInteractive &screen,
+    int &horizontal_selected,
+    int &tracks_selected,
+    int &playlists_selected,
+    bool &in_playlist,
+    int &in_playlist_selected
+) {
+    return Renderer([&]() {
+
+        if (horizontal_selected != 2) {
+            int selected_vertical;
+            bool is_tracks;
+
+            if (horizontal_selected == 0) {
+                selected_vertical = tracks_selected;
+                is_tracks = true;
+            } else {
+                if (in_playlist) {
+                    selected_vertical = in_playlist_selected;
+                } else {
+                    selected_vertical = playlists_selected;
+                }
+                is_tracks = false;
+            }
+
+            int scroll_offset = 0;
+            int visible_lines = screen.dimy()-4;
+            if (selected_vertical < scroll_offset)
+                scroll_offset = selected_vertical;
+            else if (selected_vertical >= scroll_offset + visible_lines)
+                scroll_offset = selected_vertical - visible_lines + 1;
+
+            Elements items;
+            for (int i = scroll_offset; i < scroll_offset + visible_lines && i < (is_tracks ? this->spotify.user.liked_tracks.size() : this->spotify.user.playlists.size()); ++i) {
+                bool is_selected = i == selected_vertical;
+                if (is_tracks) {
+                    int duration = this->spotify.user.liked_tracks[i].duration_ms/1000;
+                    std::ostringstream dur;
+                    dur << (duration / 60) << ":" << std::setw(2) << std::setfill('0') << (duration % 60);
+                    auto item = this->spotify.user.liked_tracks.size() != 0 ? 
+                        hbox({
+                            text(this->spotify.user.liked_tracks[i].artist + " - " + this->spotify.user.liked_tracks[i].name),
+                            text(" " + this->spotify.user.liked_tracks[i].album_name + " ") | xflex,
+                            text(
+                                dur.str()
+                            )
+                        }) | (is_selected ? bgcolor(Color::Green) | color(Color::White) : nothing)
+                        : text("");
+                    items.push_back(item);
+                } else {
+                    if (in_playlist) {
+
+                    }
+                    auto item = this->spotify.user.playlists.size() != 0 ? 
+                        hbox({
+                            text(this->spotify.user.playlists[i].name + " - " + this->spotify.user.playlists[i].owner),
+                            text(" ") | xflex,
+                            text(
+                                std::to_string(this->spotify.user.playlists[i].track_count)
+                                + " tracks"
+                            )
+                        }) | (is_selected ? bgcolor(Color::Green) | color(Color::White) : nothing)
+                        : text("");
+                    items.push_back(item);
+                }
+            }
+
+            return vbox(std::move(items));
+        } else {
+            return text("Keybindings");
+        }
+
+    });
+}
 
 ftxui::Component App::TimeBar(ftxui::ScreenInteractive &screen) {
     return Renderer([&]() {
@@ -262,12 +345,19 @@ ftxui::Component App::TimeBar(ftxui::ScreenInteractive &screen) {
             repeat_utf8("╌", empty_len);
 
 
-        return text(bar) | color(Color::Blue);
+        return text(bar) | color(Color::Cyan);
     });
 }
 
 ftxui::Component App::CurrentBar() {
     return Renderer([&]() {
+        int time = spotify.context.position_ms/1000;
+        int time_full = spotify.context.current.duration_ms/1000;
+
+        std::ostringstream t1,t2;
+        t1 << (time / 60) << ":" << std::setw(2) << std::setfill('0') << (time % 60);
+        t2 << (time_full / 60) << ":" << std::setw(2) << std::setfill('0') << (time_full % 60);
+
         return hbox({
             text(
                 (spotify.context.is_playing
@@ -277,13 +367,135 @@ ftxui::Component App::CurrentBar() {
             ),
             text("  ") | xflex,
             text(
-                std::to_string(spotify.context.position_ms/1000)
-                + "/" + std::to_string(spotify.context.current.duration_ms/1000)
+                t1.str()
+                + " / " + t2.str()
                 + " [" + std::to_string(spotify.context.volume)
                 + "%%]"
             )
         });
     });
 }
+
+bool App::HandleEvent(ftxui::Event &event) {
+
+    if (event == Event::Special("tick")) {
+        PlayerEvent* player_event;
+        if (player_channel_poll(this->spotify.player_channel, player_event)) {
+            if (player_event->event == PLAYER_EVENT_TIME_TO_PRELOAD_NEXT_TRACK) {
+                this->spotify.Preload("spotify:track:6hxowqRsDm1fsm00y2eHJP");
+            } else if (player_event->event == PLAYER_EVENT_END_OF_TRACK) {
+                this->spotify.Load("spotify:track:6hxowqRsDm1fsm00y2eHJP", true, 0);
+            } else if (player_event->event == PLAYER_EVENT_POSITION_CHANGED) {
+                spotify.context.position_ms = player_event->data.position_changed.position_ms;
+                this->UpdatePlaybackCache();
+            }
+        }
+        return true;
+    }
+    if (event == Event::Character('j')) {
+        // selected_vertical = selected_vertical == this->spotify.user.liked_tracks.size()-1 ? selected_vertical : ++selected_vertical;
+        return true;
+    }
+    if (event == Event::Character('k')) {
+        // selected_vertical = selected_vertical == 0 ? selected_vertical : --selected_vertical;
+        return true;
+    }
+    if (event == Event::Character('l')) {
+        // selected_horizontal = selected_horizontal == horizontal_entries.size()-1 ? selected_horizontal : ++selected_horizontal;
+        return true;
+    }
+    if (event == Event::Character('h')) {
+        // selected_horizontal = selected_horizontal == 0 ? selected_horizontal : --selected_horizontal;
+        return true;
+    }
+    if (event == Event::Character('P')) {
+        if (spotify.context.is_playing) {
+            player_pause(this->spotify.player);
+        } else {
+            player_play(this->spotify.player);
+        }
+        spotify.context.is_playing = !spotify.context.is_playing;
+        return true;
+    }
+    if (event == Event::Character('f')) {
+        auto now = std::chrono::steady_clock::now();
+        // if (now - last_press_time > delay) {
+        //     last_press_time = now;
+        //     player_seek(spotify.player, spotify.context.position_ms + 1000);
+        // }
+        this->UpdatePlaybackCache();
+        return true;
+    }
+    if (event == Event::Character('b')) {
+        auto now = std::chrono::steady_clock::now();
+        // if (now - last_press_time > delay) {
+        //     last_press_time = now;
+        //     player_seek(spotify.player, spotify.context.position_ms < 1000 ? 0 : spotify.context.position_ms - 1000);
+        // }
+        this->UpdatePlaybackCache();
+        return true;
+    }
+    if (event == Event::Character('F')) {
+        auto now = std::chrono::steady_clock::now();
+        // if (now - last_press_time > delay) {
+        //     last_press_time = now;
+        //     player_seek(spotify.player, spotify.context.position_ms + 5000);
+        // }
+        this->UpdatePlaybackCache();
+        return true;
+    }
+    if (event == Event::Character('B')) {
+        auto now = std::chrono::steady_clock::now();
+        // if (now - last_press_time > delay) {
+        //     last_press_time = now;
+        //     player_seek(spotify.player, spotify.context.position_ms < 5000 ? 0 : spotify.context.position_ms - 5000);
+        // }
+        this->UpdatePlaybackCache();
+        return true;
+    }
+    if (event == Event::Character('+')) {
+        spotify.context.volume++;
+        if (spotify.context.volume > 100) spotify.context.volume = 100;
+        mixer_set_volume(this->spotify.mixer, UINT16_MAX * (0.01 * this->spotify.context.volume));
+        this->UpdatePlaybackCache();
+        return true;
+    }
+    if (event == Event::Character('-')) {
+        if (spotify.context.volume == 0) {
+            spotify.context.volume = 0;
+        } else {
+            spotify.context.volume--;
+        }
+        if (spotify.context.volume < 0) spotify.context.volume = 0;
+        mixer_set_volume(this->spotify.mixer, UINT16_MAX * (0.01 * this->spotify.context.volume));
+        this->UpdatePlaybackCache();
+        return true;
+    }
+    if (event == Event::Character(']')) {
+        spotify.context.volume+=5;
+        if (spotify.context.volume > 100) spotify.context.volume = 100;
+        mixer_set_volume(this->spotify.mixer, UINT16_MAX * (0.01 * this->spotify.context.volume));
+        this->UpdatePlaybackCache();
+        return true;
+    }
+    if (event == Event::Character('[')) {
+        if (spotify.context.volume < 5) {
+            spotify.context.volume = 0;
+        } else {
+            spotify.context.volume-=5;
+        }
+        mixer_set_volume(this->spotify.mixer, UINT16_MAX * (0.01 * this->spotify.context.volume));
+        this->UpdatePlaybackCache();
+        return true;
+    }
+    if (event == Event::Character('q')) {
+        // running = false;
+        // this->UpdatePlaybackCache();
+        // screen.Exit();
+        return true;
+    }
+    return false;
+
+};
 
 }

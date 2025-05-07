@@ -28,6 +28,7 @@ public:
     std::string                 id;
     std::string                 uri;
     std::string                 name;
+    std::string                 album_name;
     SpotifyItemType             type;
     std::string                 artist;
     std::vector<std::string>    features;
@@ -38,6 +39,20 @@ public:
     ~SpotifyItem();
 
     ftxui::Component Render(); 
+
+};
+
+class Playlist {
+    
+public:
+    std::string                 name;
+    std::string                 owner;
+    std::string                 album;
+    uint32_t                    track_count;
+    std::vector<SpotifyItem>    tracks;
+
+    Playlist();
+    ~Playlist();
 
 };
 
@@ -59,6 +74,8 @@ class User {
 
 public:
     std::string display_name;
+    std::vector<SpotifyItem> liked_tracks;
+    std::vector<Playlist>    playlists;
     std::string access_token;
     std::string refresh_token;
     uint64_t    expires_at;
@@ -67,6 +84,8 @@ public:
     User(std::string display_name, cache::UserCache &user_cache);
     ~User();
 
+    void LikedTracks(phone::Phone &phone);
+    void GetPlaylists(phone::Phone &phone);
 
 };
 
