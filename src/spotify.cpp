@@ -1,5 +1,3 @@
-#include "phone.hpp"
-#include <chrono>
 #include <iostream>
 #include <librespot/oauth.h>
 #include <spotify.hpp>
@@ -7,6 +5,20 @@
 namespace spotify {
 
 SpotifyItem::SpotifyItem() {}
+SpotifyItem::SpotifyItem(phone::Phone &phone, std::string id) {
+
+    phone.Perform("https://api.spotify.com/v1/tracks/" + id, true, {});
+    if (phone.code == phone::SUCCESS) {
+        std::cout << phone.data.dump(4) << std::endl;
+
+        this->id = phone.data["id"].get<std::string>();
+        this->uri = phone.data["uri"].get<std::string>();
+        this->name = phone.data["name"].get<std::string>();
+        this->artist = phone.data["artists"][0]["name"].get<std::string>();
+        this->duration_ms = phone.data["duration_ms"].get<uint32_t>();
+    }
+
+}
 SpotifyItem::~SpotifyItem() {}
 
 Context::Context() {}
@@ -24,25 +36,30 @@ User::~User() {}
 Spotify::Spotify(cache::Cache &cache, config::Config &config) {
 
     cache::UserCache &user_cache = cache.GetUserCache();
+    cache::PlaybackCache &playback_cache = cache.GetPlaybackCache();
+
     this->phone = phone::Phone();
     this->phone.SetToken(user_cache.access_token);
+    this->phone.Perform("https://api.spotify.com/v1/me", true, {});
 
     if (user_cache.access_token.size() == 0) {
         AuthUser(cache, config);
-    } else {
-
         this->phone.Perform("https://api.spotify.com/v1/me", true, {});
+    } else {
         if (this->phone.code != phone::SUCCESS) {
-            if (this->phone.code == phone::EXPIRED_TOKEN) {
-                // TODO: REFRESH TOKEN
-                AuthUser(cache, config);
-                this->phone.Perform("https://api.spotify.com/v1/me", true, {});
-            }
+            // TODO: REFRESH TOKEN
+            AuthUser(cache, config);
+            this->phone.Perform("https://api.spotify.com/v1/me", true, {});
+            std::cout << "here" << std::endl;
         }
     }
 
     std::cout << this->phone.data.dump(4) << std::endl;
+
+
     this->user = User(this->phone.data["display_name"].get<std::string>(), user_cache);
+    this->SetupContext(playback_cache);
+
     Credentials* creds = credentials_new(this->user.access_token.c_str());
     Session* session = session_new(session_config_default());
     session_connect(session, creds);
@@ -50,6 +67,9 @@ Spotify::Spotify(cache::Cache &cache, config::Config &config) {
     this->mixer = mixer_new(mixer_config_default(), "softvol");
     this->player = player_new(player_config_default(), session, this->mixer, "pulseaudio");
     this->player_channel = player_channel_get(this->player);
+
+    this->phone.Perform("https://api.spotify.com/v1/me/tracks", true, {});
+    std::cout << this->phone.data.dump(4) << std::endl;
 
 }
 Spotify::~Spotify() {}
@@ -63,7 +83,6 @@ void Spotify::Preload(std::string spotify_uri) {
     player_preload(this->player, spotify_uri.c_str());
 }
 
-void Spotify::Load() {}
 void Spotify::Load(
     std::string spotify_uri,
     bool        start_playing,
@@ -72,8 +91,8 @@ void Spotify::Load(
     player_load(this->player, spotify_uri.c_str(), start_playing, position_ms);
 }
 
-void Spotify::RefreshToken() {}
 void Spotify::UpdateToken(std::string access_token) {}
+void Spotify::RefreshToken() {}
 
 void Spotify::AuthUser(cache::Cache &cache, config::Config &config) {
     OAuthBuilder* oauth = oauth_builder_new(SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_URI);
@@ -91,6 +110,20 @@ void Spotify::AuthUser(cache::Cache &cache, config::Config &config) {
             this->user.refresh_token,
             this->user.expires_at
         );
+    }
+
+    this->phone.SetToken(this->user.access_token);
+
+}
+
+void Spotify::SetupContext(cache::PlaybackCache &playback_cache) {
+
+    this->context.is_playing = false;
+    this->context.position_ms = playback_cache.position_ms;
+    this->context.volume = playback_cache.volume;
+
+    if (playback_cache.spotify_id.size() != 0) {
+        this->context.current = SpotifyItem(this->phone, playback_cache.spotify_id);
     }
 
 }

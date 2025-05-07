@@ -5,6 +5,8 @@
 #include <config.hpp>
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>
+#include <ftxui/component/screen_interactive.hpp>
+#include <memory>
 #include <spotify.hpp>
 
 namespace ui {
@@ -32,6 +34,10 @@ public:
         spotify::Spotify    &spotify
     );
     ~App();
+
+private:
+    ftxui::Component TimeBar(ftxui::ScreenInteractive &screen);
+    ftxui::Component CurrentBar();
 
 };
 

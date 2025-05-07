@@ -6,6 +6,7 @@
 #include <config.hpp>
 #include <cstdint>
 #include <curl/curl.h>
+#include <ftxui/component/component_base.hpp>
 #include <librespot/playback.h>
 #include <queue>
 #include <string>
@@ -25,12 +26,18 @@ class SpotifyItem {
 
 public:
     std::string                 id;
+    std::string                 uri;
+    std::string                 name;
     SpotifyItemType             type;
     std::string                 artist;
     std::vector<std::string>    features;
+    uint32_t                    duration_ms;
 
     SpotifyItem();
+    SpotifyItem(phone::Phone &phone, std::string id);
     ~SpotifyItem();
+
+    ftxui::Component Render(); 
 
 };
 
@@ -40,6 +47,7 @@ public:
     SpotifyItem             current;
     bool                    is_playing;
     uint32_t                position_ms;
+    uint32_t                volume;
     std::queue<SpotifyItem> queue;
 
     Context();
@@ -86,11 +94,12 @@ public:
     );
     uint32_t PositionMs();
 
-    void RefreshToken();
     void UpdateToken(std::string access_token);
+    void RefreshToken();
 
 private:
     void AuthUser(cache::Cache &cache, config::Config &config);
+    void SetupContext(cache::PlaybackCache &playback_cache);
 
 };
 
