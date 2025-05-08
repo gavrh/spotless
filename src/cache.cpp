@@ -17,6 +17,9 @@ PlaybackCache::PlaybackCache(toml::value &value) {
     this->spotify_id = value.contains("spotify_id") ? std::string(value["spotify_id"].as_string()) : this->spotify_id;
     this->position_ms = value.contains("position_ms") ? value["position_ms"].as_integer() : this->position_ms;
     this->volume = value.contains("volume") ? value["volume"].as_integer() : this->volume;
+    this->is_track = value.contains("is_track") ? value["is_track"].as_boolean() : this->is_track;
+    this->track_id = value.contains("track_id") ? value["track_id"].as_string() : this->track_id;
+    this->playlist_id = value.contains("playlist_id") ? value["playlist_id"].as_string() : this->playlist_id;
 }
 PlaybackCache::~PlaybackCache() {}
 
@@ -50,6 +53,9 @@ Cache::Cache() {
             cache["playback"]["spotify_id"] = this->playback.spotify_id;
             cache["playback"]["position_ms"] = this->playback.position_ms;
             cache["playback"]["volume"] = this->playback.volume;
+            cache["playback"]["is_track"] = this->playback.is_track;
+            cache["playback"]["track_id"] = this->playback.track_id;
+            cache["playback"]["playlist_id"] = this->playback.playlist_id;
 
             std::ofstream cache_file(path);
             cache_file << std::setw(80) << cache;
@@ -99,11 +105,17 @@ void Cache::UpdateUserCache(
 void Cache::UpdatePlaybackCache(
     std::string spotify_id,
     uint32_t    position_ms,
-    uint32_t    volume
+    uint32_t    volume,
+    bool        is_track,
+    std::string track_id,
+    std::string playlist_id
 ) {
     this->playback.spotify_id = spotify_id;
     this->playback.position_ms = position_ms;
     this->playback.volume = volume;
+    this->playback.is_track = is_track;
+    this->playback.track_id = track_id;
+    this->playback.playlist_id = playlist_id;
 
     std::string path = this->CachePath();
 
@@ -113,6 +125,9 @@ void Cache::UpdatePlaybackCache(
         cache["playback"]["spotify_id"] = this->playback.spotify_id;
         cache["playback"]["position_ms"] = this->playback.position_ms;
         cache["playback"]["volume"] = this->playback.volume;
+        cache["playback"]["is_track"] = this->playback.is_track;
+        cache["playback"]["track_id"] = this->playback.track_id;
+        cache["playback"]["playlist_id"] = this->playback.playlist_id;
 
         std::ofstream cache_file(path);
         cache_file << std::setw(80) << cache;

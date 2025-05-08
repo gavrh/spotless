@@ -26,6 +26,9 @@ public:
     std::string spotify_id =    "";
     uint32_t    position_ms =   0;
     uint32_t    volume =        50;
+    bool        is_track =      false;
+    std::string track_id =      "";
+    std::string playlist_id =   "";
 
     PlaybackCache() = default;
     PlaybackCache(toml::value &value);
@@ -53,7 +56,10 @@ public:
     void UpdatePlaybackCache(
         std::string spotify_id,
         uint32_t    position_ms,
-        uint32_t    volume
+        uint32_t    volume,
+        bool        is_track,
+        std::string track_id,
+        std::string playlist_id
     );
 
 private:
