@@ -18,8 +18,8 @@ PlaybackCache::PlaybackCache(toml::value &value) {
     this->position_ms = value.contains("position_ms") ? value["position_ms"].as_integer() : this->position_ms;
     this->volume = value.contains("volume") ? value["volume"].as_integer() : this->volume;
     this->is_track = value.contains("is_track") ? value["is_track"].as_boolean() : this->is_track;
-    this->track_id = value.contains("track_id") ? value["track_id"].as_string() : this->track_id;
-    this->playlist_id = value.contains("playlist_id") ? value["playlist_id"].as_string() : this->playlist_id;
+    this->track_id = value.contains("track_id") ? std::string(value["track_id"].as_string()) : this->track_id;
+    this->playlist_id = value.contains("playlist_id") ? std::string(value["playlist_id"].as_string()) : this->playlist_id;
 }
 PlaybackCache::~PlaybackCache() {}
 
