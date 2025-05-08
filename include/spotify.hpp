@@ -1,13 +1,13 @@
 #ifndef SPOTLESS_SPOTIFY_HPP
 #define SPOTLESS_SPOTIFY_HPP
 
-#include "phone.hpp"
 #include <cache.hpp>
 #include <config.hpp>
 #include <cstdint>
 #include <curl/curl.h>
 #include <ftxui/component/component_base.hpp>
 #include <librespot/playback.h>
+#include <phone.hpp>
 #include <queue>
 #include <string>
 #include <vector>

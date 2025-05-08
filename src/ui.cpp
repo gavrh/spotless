@@ -59,7 +59,6 @@ App::App(
     });
 
 
-    // Combine all components
     Component main = Container::Vertical({
         horizontal_menu,
     });
