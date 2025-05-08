@@ -67,6 +67,7 @@ void User::GetPlaylists(phone::Phone &phone) {
          + "/tracks?limit=100";
 
         playlist.name = item["name"].get<std::string>();
+        playlist.id = item["id"].get<std::string>();
         playlist.owner = item["owner"]["display_name"].get<std::string>();
         playlist.track_count = item["tracks"]["total"].get<uint32_t>();
         
@@ -178,8 +179,11 @@ void Spotify::SetupContext(cache::PlaybackCache &playback_cache) {
     this->context.is_playing = false;
     this->context.position_ms = playback_cache.position_ms;
     this->context.volume = playback_cache.volume;
+    this->context.is_track = playback_cache.is_track;
+    this->context.track_id = playback_cache.track_id;
+    this->context.playlist_id = playback_cache.playlist_id;
 
-    if (playback_cache.spotify_id.size() != 0) {
+    if (!playback_cache.spotify_id.empty()) {
         this->context.current = SpotifyItem(this->phone, playback_cache.spotify_id);
     }
 

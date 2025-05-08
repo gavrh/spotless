@@ -46,6 +46,7 @@ class Playlist {
     
 public:
     std::string                 name;
+    std::string                 id;
     std::string                 owner;
     std::string                 album;
     uint32_t                    track_count;
@@ -60,6 +61,10 @@ class Context {
 
 public:
     SpotifyItem             current;
+    bool                    is_track;
+    std::string             track_id;
+    std::string             playlist_id;
+    int                     location_index = -1;
     bool                    is_playing;
     uint32_t                position_ms;
     uint32_t                volume;
