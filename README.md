@@ -6,7 +6,7 @@ without the need for a heavy app or GUI.
 
 ## Installation
 
-### Linux
+### Linux / Mac
 ```bash
 # clone repo
 git clone https://github.com/gavrh/spotless.git && cd spotless
@@ -19,9 +19,6 @@ cmake .. && make
 # link to bin directory
 sudo ln -sf "$(pwd)/spotless" /usr/local/bin/spotless
 ```
-
-### Mac
-coming soon...
 
 ### Windows
 coming soon...
