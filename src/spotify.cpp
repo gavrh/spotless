@@ -70,6 +70,8 @@ void User::GetPlaylists(phone::Phone &phone) {
         playlist.id = item["id"].get<std::string>();
         playlist.owner = item["owner"]["display_name"].get<std::string>();
         playlist.track_count = item["tracks"]["total"].get<uint32_t>();
+
+        if (playlist.track_count == 0) continue;
         
         while (!url.empty()) {
             phone.Perform(url, true, {});
