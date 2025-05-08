@@ -128,7 +128,7 @@ Spotify::Spotify(cache::Cache &cache, config::Config &config) {
     session_connect(session, creds);
 
     this->mixer = mixer_new(mixer_config_default(), "softvol");
-    this->player = player_new(player_config_default(), session, this->mixer, "pulseaudio");
+    this->player = player_new(player_config_default(), session, this->mixer, "rodio");
     this->player_channel = player_channel_get(this->player);
 
 }
