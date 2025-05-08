@@ -44,7 +44,10 @@ private:
         int &tracks_selected,
         int &playlists_selected,
         bool &in_playlist,
-        int &in_playlist_selected
+        int &in_playlist_selected,
+        int &tracks_offset,
+        int &playlists_offset,
+        int &in_playlist_offset
     );
     ftxui::Component TimeBar(ftxui::ScreenInteractive &screen);
     ftxui::Component CurrentBar();

@@ -44,6 +44,9 @@ App::App(
     int playlists_selected = 0;
     bool in_playlist = false;
     int in_playlist_selected = 0;
+    int tracks_offset = 0;
+    int playlists_offset = 0;
+    int in_playlist_offset = 0;
 
     Component horizontal_menu = Renderer([&] {
         Elements items;
@@ -81,7 +84,10 @@ App::App(
                         tracks_selected,
                         playlists_selected,
                         in_playlist,
-                        in_playlist_selected
+                        in_playlist_selected,
+                        tracks_offset,
+                        playlists_offset,
+                        in_playlist_offset
                     )->Render() | yflex,
                     this->TimeBar(screen)->Render(),
                     this->CurrentBar()->Render(), 
@@ -281,27 +287,33 @@ ftxui::Component App::List(
     int &tracks_selected,
     int &playlists_selected,
     bool &in_playlist,
-    int &in_playlist_selected
+    int &in_playlist_selected,
+    int &tracks_offset,
+    int &playlists_offset,
+    int &in_playlist_offset
 ) {
     return Renderer([&]() {
 
         if (horizontal_selected != 2) {
             int selected_vertical;
             bool is_tracks;
+            int scroll_offset;
 
             if (horizontal_selected == 0) {
                 selected_vertical = tracks_selected;
+                scroll_offset = tracks_offset;
                 is_tracks = true;
             } else {
                 if (in_playlist) {
                     selected_vertical = in_playlist_selected;
+                    scroll_offset = in_playlist_offset;
                 } else {
                     selected_vertical = playlists_selected;
+                    scroll_offset = playlists_offset;
                 }
                 is_tracks = false;
             }
 
-            int scroll_offset = 0;
             int visible_lines = screen.dimy()-4;
             if (selected_vertical < scroll_offset)
                 scroll_offset = selected_vertical;
@@ -366,6 +378,16 @@ ftxui::Component App::List(
                             : text("");
                         items.push_back(item);
                     }
+                }
+            }
+
+            if (horizontal_selected == 0) {
+                tracks_offset = scroll_offset;
+            } else {
+                if (in_playlist) {
+                    in_playlist_offset = scroll_offset;
+                } else {
+                    playlists_offset = scroll_offset;
                 }
             }
 
